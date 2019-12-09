@@ -4,7 +4,8 @@
   "description": "Code challenge for node scripting an HLS conversion using FFmpeg.",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "create-ts-segments": "ffmpeg -i ./assets/tos-teaser.mp4 -profile:v baseline -level 3.0 -s 640x360 -start_number 0 -hls_time 6 -hls_list_size 0 -f hls ./assets/stream.m3u8"
   },
   "author": "Kyle Weintraub",
   "license": "ISC",
@@ -13,6 +14,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "ffmpeg": "0.0.4",
+    "fluent-ffmpeg": "^2.1.2",
     "fs": "0.0.1-security",
     "path": "^0.12.7"
   },
