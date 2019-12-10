@@ -1,5 +1,6 @@
 const express = require('express');
 const ffmpeg = require('ffmpeg');
+const FfmpegCommand = require('fluent-ffmpeg');
 const path = require('path');
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -7,47 +8,16 @@ const bodyParser = require("body-parser");
 const app = express();
 app.use(cors())
 
-app.get('/ffmpeg', (req, res) => {
-	const process = new ffmpeg('assets/tos-teaser.mp4');
-	process.then(video => {
-		console.log(video);
-		res.json(video);
-	});
-})
-
 app.get('/', (request, response) => {
   response.json({
     message: 'Welcome',
     availableRoutes: {
-			"/video-setup": "sample video setup step, visible as part of process",
 			"/metadata": 'Json representation of metadata and info configuration',
+			"/convert": "Processes video into multiple bitrate ts segments",
     }
   })
 })
 
-app.get('/video-setup', (request, response) => {
-  try {
-		new ffmpeg('assets/tos-teaser.mp4', function (err, video) {
-			if (!err) {
-				console.log('The video is ready to be processed');
-				response.json({
-					message: 'The video is ready to be processed'
-				})
-			} else {
-				console.log('Error: ' + err);
-				response.json({
-					error: err
-				})
-			}
-		});
-	} catch (e) {
-		console.log(e.code);
-		console.log(e.msg);
-		response.json({
-			error: e
-		})
-	}
-});
 
 app.get('/metadata', (request, response) => {
   try {
@@ -73,6 +43,28 @@ app.get('/metadata', (request, response) => {
 		})
 	}
 });
+
+app.get('/convert', (req, res) => {
+	const highBitrateCommand = new Promise((resolve, reject) => FfmpegCommand('assets/tos-teaser.mp4').outputOptions(['-b:v 6000k', '-s 1280x720', '-hls_time 6', '-hls_list_size 0', '-f hls']).output('./assets/highBitstream.m3u8').run())
+	const medHighBitrateCommand = new Promise((resolve, reject) => FfmpegCommand('assets/tos-teaser.mp4').outputOptions(['-b:v 4800k', '-s 1280x720', '-hls_time 6', '-hls_list_size 0', '-f hls']).output('./assets/medHighBitstream.m3u8').run())
+	const medBitrateCommand = new Promise((resolve, reject) => FfmpegCommand('assets/tos-teaser.mp4').outputOptions(['-b:v 3600k', '-s 960x540', '-hls_time 6', '-hls_list_size 0', '-f hls']).output('./assets/medBitstream.m3u8').run())
+	const medLowBitrateCommand = new Promise((resolve, reject) => FfmpegCommand('assets/tos-teaser.mp4').outputOptions(['-b:v 2400k', '-s 960x540', '-hls_time 6', '-hls_list_size 0', '-f hls']).output('./assets/medLowBitstream.m3u8').run())
+	const lowBitrateCommand = new Promise((resolve, reject) => FfmpegCommand('assets/tos-teaser.mp4').outputOptions(['-b:v 1100k', '-s 640x360', '-hls_time 6', '-hls_list_size 0', '-f hls']).output('./assets/lowBitstream.m3u8').run())
+
+	Promise.all([
+		highBitrateCommand,
+		medHighBitrateCommand,
+		medBitrateCommand,
+		medLowBitrateCommand,
+		lowBitrateCommand
+	]).then(result => {
+		console.warn('slime result', result);
+		res.json({
+			message: "video proccessing complete",
+			result,
+		})
+	})
+})
 
 app.listen(5000, () => {
   console.log('Listening on port 5000!')

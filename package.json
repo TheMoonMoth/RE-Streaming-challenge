@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js",
-    "create-ts-segments": "ffmpeg -i ./assets/tos-teaser.mp4 -profile:v baseline -level 3.0 -s 640x360 -start_number 0 -hls_time 6 -hls_list_size 0 -f hls ./assets/stream.m3u8"
+    "create-ts-segments-example": "ffmpeg -i ./assets/tos-teaser.mp4 -profile:v baseline -level 3.0 -s 640x360 -start_number 0 -hls_time 6 -hls_list_size 0 -f hls ./assets/stream.m3u8",
+    "create-ts-segments": "ffmpeg -i ./assets/tos-teaser.mp4 -b:v 6000k -s 1280x720 -hls_time 6 -hls_list_size 0 -f hls ./assets/6000kstream.m3u8"
   },
   "author": "Kyle Weintraub",
   "license": "ISC",
