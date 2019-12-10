@@ -1,7 +1,7 @@
 Please clone the repo and follow these steps
 
 Move into project:
-`cd video-streaming-challenge`
+`cd RE-Streaming-challenge`
 
 Install dependencies:
 `npm install`
